@@ -1,0 +1,1 @@
+g++ *.cpp -o 28114-AliParlakci
