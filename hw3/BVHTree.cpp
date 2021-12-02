@@ -4,6 +4,7 @@ BVHTreeNode *insertToLeaf(BVHTreeNode *&node, AABB objectArea, std::string name)
 BVHTreeNode *&findLeaf(BVHTreeNode *&node, AABB objectArea);
 void correctParents(BVHTreeNode *node);
 void getCollidingObjectsRec(AABB object, BVHTreeNode * node, std::vector<std::string> & list);
+void makeEmpty(BVHTreeNode* node);
 
 void BVHTree::printNode(std::ostream &out, BVHTreeNode *node, int level)
 {
@@ -49,6 +50,20 @@ BVHTree::BVHTree()
 
 BVHTree::~BVHTree()
 {
+	makeEmpty(root);
+}
+
+void makeEmpty(BVHTreeNode* node)
+{
+	if (node)
+	{
+		makeEmpty(node->leftChild);
+		makeEmpty(node->rightChild);
+
+		delete node;
+	}
+
+	node = 0;
 }
 
 void BVHTree::addBVHMember(AABB objectArea, std::string name)
