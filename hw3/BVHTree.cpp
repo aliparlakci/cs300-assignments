@@ -144,6 +144,7 @@ void BVHTree::removeBVHMember(std::string name)
 
 	sibling->parent = grandParent;
 
+	correctParents(sibling);
 	map.erase(name);
 	delete nodeToBeDeleted;
 	delete parent;
