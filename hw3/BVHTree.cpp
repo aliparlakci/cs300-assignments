@@ -112,8 +112,26 @@ void BVHTree::removeBVHMember(std::string name)
 {
 	BVHTreeNode *nodeToBeDeleted = map[name];
 	BVHTreeNode *parent = nodeToBeDeleted->parent;
+
+	if (root->leftChild == NULL && root->rightChild == NULL)
+	{
+		root = NULL;
+		map.erase(name);
+		delete nodeToBeDeleted;
+		return;
+	}
+
 	BVHTreeNode *sibling = parent->leftChild == nodeToBeDeleted ? parent->rightChild : parent->leftChild;
 	BVHTreeNode *grandParent = parent->parent;
+
+	if (grandParent == NULL)
+	{
+		root = sibling;
+		map.erase(name);
+		delete nodeToBeDeleted;
+		delete parent;
+		return;
+	}
 
 	if (grandParent->leftChild == parent)
 	{
