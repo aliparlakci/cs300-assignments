@@ -20,7 +20,7 @@ struct edge
 typedef unordered_map<vertex, vector<edge>> adjacency_list;
 struct attributes
 {
-	int distance;
+	unsigned long long distance;
 	vertex path;
 };
 
@@ -35,30 +35,45 @@ string build_deletion_diff_string(char c, int pos);
 void find_paths(unordered_map<vertex, attributes>& bst_tree, adjacency_list& graph, vertex word);
 void trace_path(adjacency_list& graph, unordered_map<vertex, attributes>& bfs_tree, vertex v);
 string find_edge(adjacency_list& graph, vertex from, vertex to);
+void find_furthest_word(unordered_map<vertex, attributes>& bfs_tree, vertex v);
 
 int main()
 {
-	ifstream db_file("words_medium.txt");
+	ifstream db_file("words_large.txt");
 	if (db_file.fail()) return -1;
 
 	adjacency_list graph;
 
+	cout << "Reading the words from the given dictionary..." << endl;
 	read_words(graph, db_file);
+	cout << "Analyzing the words... (This might take a while, please wait)" << endl;
 	construct_edges(graph);
 	db_file.close();
 
 	string input, a, b;
-	cout << ">> ";
+	cout << endl << "Enter the words separated by space: ";
 	while (getline(cin, input))
 	{
 		istringstream lineStream(input);
 		lineStream >> a;
 		lineStream >> b;
 
+		if (a.size() > 1 && a[0] == '*')
+		{
+			return 0;
+		}
+
+		if (graph.find(a) == graph.end() || graph.find(b) == graph.end())
+		{
+			cout << "Not every word exist in the given word list!" << endl;
+			cout << endl << "Enter the words separated by space: ";
+			continue;
+		}
+
 		unordered_map<vertex, attributes> bfs_tree;
 		find_paths(bfs_tree, graph, a);
 		trace_path(graph, bfs_tree, b);
-		cout << endl << ">> ";
+		cout << endl << "Enter the words separated by space: ";
 	}
 
 	return 0;
@@ -85,8 +100,18 @@ void construct_edges(adjacency_list& graph)
 void compute_insertions(adjacency_list& graph, vertex key)
 {
 	string derivation;
-	for (unsigned char c = 'a'; c <= 122; c++)
+	for (int k = 0; k < 28; k++)
 	{
+		unsigned char c;
+		if (k < 26)
+		{
+			c = 'a' + k;
+		}
+		else
+		{
+			if (k == 26) c = '\'';
+			else if (k == 27) c = '-';
+		}
 		for (int i = 0; i <= key.length(); i++)
 		{
 			derivation = key;
@@ -122,8 +147,18 @@ void compute_deletions(adjacency_list& graph, vertex key)
 void compute_swaps(adjacency_list& graph, vertex key)
 {
 	string derivation;
-	for (unsigned char c = 'a'; c <= 122; c++)
+	for (int k = 0; k < 28; k++)
 	{
+		unsigned char c;
+		if (k < 26)
+		{
+			c = 'a' + k;
+		}
+		else
+		{
+			if (k == 26) c = '\'';
+			else if (k == 27) c = '-';
+		}
 		for (int i = 0; i < key.length(); i++)
 		{
 			derivation = key;
@@ -163,7 +198,7 @@ void find_paths(unordered_map<vertex, attributes>& bst_tree, adjacency_list& gra
 	queue<vertex> q;
 	vertex v, w;
 	q.push(word);
-	bst_tree[word] = { 0, "" };
+	bst_tree[word] = { (unsigned long long)0, "" };
 
 	while (!q.empty())
 	{
@@ -229,4 +264,20 @@ string find_edge(adjacency_list& graph, vertex from, vertex to)
 			return edge.diff;
 	}
 	return "";
+}
+
+void find_furthest_word(unordered_map<vertex, attributes>& bfs_tree, vertex v)
+{
+	vertex word;
+	unsigned long long max_distance = 0;
+	for (auto v : bfs_tree)
+	{
+		if (v.second.distance > max_distance)
+		{
+			max_distance = v.second.distance;
+			word = v.first;
+		}
+	}
+
+	cout << "Furthest word from " << v << " is " << word << endl;
 }
